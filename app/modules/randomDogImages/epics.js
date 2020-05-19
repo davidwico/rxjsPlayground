@@ -1,14 +1,14 @@
 import { ofType } from 'redux-observable';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { ajax } from 'rxjs/ajax';
-import { mergeMap, map, catchError, takeUntil, delay } from 'rxjs/operators';
+import { mergeMap, map, catchError, takeUntil, concat, delay, take, retryWhen } from 'rxjs/operators';
 import { fetchRandomDogImageSuccess, fetchRandomDogImageFailure } from './actions';
 import TYPES from './types';
 
 const URL = 'https://dog.ceo/api/breeds/image/random';
 
 // Broken URL for error handler testing
-// const URL = 'https://dogxx.ceo/api/breeds/image/random';
+// const URL = 'https://dog.ceo/api/breeds/images/random';
 
 // -- Basic fetch --
 // const fetchRandomDogImageEpic = (action$) =>
@@ -23,6 +23,25 @@ const URL = 'https://dog.ceo/api/breeds/image/random';
 //     ofType(TYPES.FETCH_RANDOM_DOG_IMAGE_REQUESTED),
 //     mergeMap((action) =>
 //       ajax.getJSON(URL).pipe(
+//         map((response) => fetchRandomDogImageSuccess(response)),
+//         catchError((error) => of(fetchRandomDogImageFailure(error))),
+//       ),
+//     ),
+//   );
+
+// -- Basic fetch with retry on error --
+// const fetchRandomDogImageEpic = (action$) =>
+//   action$.pipe(
+//     ofType(TYPES.FETCH_RANDOM_DOG_IMAGE_REQUESTED),
+//     mergeMap((action) =>
+//       ajax.getJSON(URL).pipe(
+//         retryWhen((errors) =>
+//           errors.pipe(
+//             delay(500),
+//             take(2),
+//             concat(throwError({ message: 'Error' })),
+//           ),
+//         ),
 //         map((response) => fetchRandomDogImageSuccess(response)),
 //         catchError((error) => of(fetchRandomDogImageFailure(error))),
 //       ),
